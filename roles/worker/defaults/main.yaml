@@ -1,0 +1,4 @@
+---
+# defaults file for worker
+worker:
+  load_balancer_ip: "{{groups['kubernetes_vip_load_balancer'][0]}}"

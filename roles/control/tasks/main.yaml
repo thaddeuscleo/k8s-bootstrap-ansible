@@ -1,0 +1,25 @@
+---
+- name: "init kubernetes"
+  command: "kubeadm init {{ control.kubeadm_extra_args }} --control-plane-endpoint={{ control.load_balancer_ip }}:{{ control.load_balancer_port }}"
+
+- name: "register kubeadm token"
+  shell: "kubeadm token list | cut -d ' ' -f1 | sed -n '2p' | tee /tmp/k8s_token"
+
+- name: "register ca cert hash"
+  shell: "openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //' | tee /tmp/k8s_master_ca_hash"
+
+- name: "retrive k8s certificate-key"
+  environment:
+    KUBECONFIG: /etc/kubernetes/admin.conf 
+  command: "kubeadm init phase upload-certs --upload-certs | sed -n '3 p' | tee /tmp/k8s-cert-key"
+
+- name: "fetch tokens and config to controller"
+  fetch:
+    src: "{{ item }}"
+    dest: /tmp/
+    flat: yes
+  with_items:
+    - /tmp/k8s_token
+    - /tmp/k8s_master_ca_hash
+    - /tmp/k8s-cert-key
+    - /etc/kubernetes/admin.conf

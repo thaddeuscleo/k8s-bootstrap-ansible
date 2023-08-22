@@ -1,5 +1,6 @@
 ---
 control:
-  kubeadm_extra_args: "--pod-network-cidr=10.244.0.0/16 --cri-socket=unix:///var/run/cri-dockerd.sock --upload-certs --skip-phases=addon/kube-proxy"
+  kubeadm_extra_args: "--pod-network-cidr=10.244.0.0/16 --cri-socket=unix:///var/run/cri-dockerd.sock --skip-phases=addon/kube-proxy"
+  kubeadm_use_load_balancer: "--upload-certs"
   load_balancer_ip: "{{groups['kubernetes_vip_load_balancer'][0]}}"
   load_balancer_port: 6443

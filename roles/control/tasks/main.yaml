@@ -1,6 +1,11 @@
 ---
 - name: "init kubernetes"
   command: "kubeadm init {{ control.kubeadm_extra_args }} --control-plane-endpoint={{ control.load_balancer_ip }}:{{ control.load_balancer_port }}"
+  when: "{{ kubeadm_init_with_lb == false }}"
+
+- name: "init kubernetes with Load Balancer"
+  command: "kubeadm init {{ control.kubeadm_extra_args }} {{ control.kubeadm_use_load_balancer }} --control-plane-endpoint={{ control.load_balancer_ip }}:{{ control.load_balancer_port }}"
+  when: "{{ kubeadm_init_with_lb == true }}"
 
 - name: "register kubeadm token"
   shell: "kubeadm token list | cut -d ' ' -f1 | sed -n '2p' | tee /tmp/k8s_token"

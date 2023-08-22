@@ -1,0 +1,46 @@
+---
+- name: disable swap
+  shell: |
+          sudo swapoff -a
+          sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+- name: Add Docker GPG apt Key
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu jammy stable
+    state: present
+
+- name: Update apt and install docker-ce
+  apt:
+    name: docker-ce
+    state: latest
+    update_cache: true
+
+- name: Install Docker Module for Python
+  pip:
+    name: docker
+
+- name: Get CRI-Dockerd Version
+  command: VER=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest|grep tag_name | cut -d '"' -f 4|sed 's/v//g')
+
+- name: Download CRI-Dockerd
+  command: wget https://github.com/Mirantis/cri-dockerd/releases/download/v${VER}/cri-dockerd-${VER}.amd64.tgz
+
+- name: extract CRI-Dockerd
+  command: tar xvf cri-dockerd-${VER}.amd64.tg
+
+- name: Install cri-dockerd
+  command: mv cri-dockerd/cri-dockerd /usr/local/bin/
+
+- name: reload daemon 
+  command: systemctl daemon-reload
+
+- name: enable cri-docker.service
+  command: systemctl enable cri-docker.service
+
+- name: enable enable --now cri-docker.socket
+  command: systemctl enable --now cri-docker.socket   

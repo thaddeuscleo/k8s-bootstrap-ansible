@@ -20,21 +20,11 @@
     state: latest
     update_cache: true
 
-- name: Install Docker Module for Python
-  pip:
-    name: docker
-
-- name: Get CRI-Dockerd Version
-  command: VER=$(curl -s https://api.github.com/repos/Mirantis/cri-dockerd/releases/latest|grep tag_name | cut -d '"' -f 4|sed 's/v//g')
-
 - name: Download CRI-Dockerd
-  command: wget https://github.com/Mirantis/cri-dockerd/releases/download/v${VER}/cri-dockerd-${VER}.amd64.tgz
-
-- name: extract CRI-Dockerd
-  command: tar xvf cri-dockerd-${VER}.amd64.tg
+  command: wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.4/cri-dockerd_0.3.4.3-0.ubuntu-jammy_amd64.deb
 
 - name: Install cri-dockerd
-  command: mv cri-dockerd/cri-dockerd /usr/local/bin/
+  command: dpkg -i /home/cleo/cri-dockerd_0.3.4.3-0.ubuntu-jammy_amd64.deb
 
 - name: reload daemon 
   command: systemctl daemon-reload
